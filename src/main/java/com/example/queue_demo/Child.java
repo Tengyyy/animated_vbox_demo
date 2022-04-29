@@ -12,9 +12,12 @@ import java.util.Random;
 
 public class Child extends Region {
 
-    boolean animating = false;
+    QueueController queueController;
 
-    Child(AnimatedVBox parent){
+    Child(AnimatedVBox parent, QueueController queueController){
+
+        this.queueController = queueController;
+
         this.setMinSize(150, 50);
         this.setPrefSize(150, 50);
         this.setMaxSize(150, 50);
@@ -22,7 +25,11 @@ public class Child extends Region {
         this.setCursor(Cursor.HAND);
         this.setBackground(createBackground());
         this.setOnMouseClicked((e) -> {
-            if(!animating) parent.remove(this);
+            if(!parent.animationsInProgress.isEmpty()) return;
+            if(queueController.moveToggle.isSelected()) {
+                parent.moveAll(0, parent.getChildren().indexOf(this) - 1, -1);
+            }
+            else parent.remove(this);
         });
 
     }
@@ -36,7 +43,4 @@ public class Child extends Region {
         return new Background(new BackgroundFill(Color.rgb(red, green, blue), CornerRadii.EMPTY, Insets.EMPTY));
     }
 
-    public void setAnimating(boolean value){
-        this.animating = value;
-    }
 }

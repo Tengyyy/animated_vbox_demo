@@ -2,8 +2,11 @@ package com.example.queue_demo;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
+
+import java.util.Random;
 
 public class QueueController {
 
@@ -14,7 +17,10 @@ public class QueueController {
     ScrollPane scrollPane;
 
     @FXML
-    Button addButton;
+    Button addButton, addRandButton;
+
+    @FXML
+    CheckBox moveToggle;
 
     AnimatedVBox animatedVBox = new AnimatedVBox();
 
@@ -26,10 +32,17 @@ public class QueueController {
 
 
     public void add(){
-        animatedVBox.add(new Child(animatedVBox));
+        animatedVBox.add(new Child(animatedVBox, this));
     }
 
+    public void addRand(){
+        Random random = new Random();
+        animatedVBox.add(random.nextInt(Math.max(animatedVBox.getChildren().size(), 1)), new Child(animatedVBox, this));
+    }
 
+    public void clear(){
+        animatedVBox.clear();
+    }
 
 
 }

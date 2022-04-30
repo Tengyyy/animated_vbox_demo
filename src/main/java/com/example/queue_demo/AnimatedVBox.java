@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class AnimatedVBox extends VBox {
 
@@ -198,12 +199,95 @@ public class AnimatedVBox extends VBox {
 
     }
 
-    public void addAll(){
+    public void addAll(Collection<? extends Node> collection){
+        height += (collection.size() * 50);
+        this.setMaxHeight(height);
+
+        Timeline heightAnimation = animateMinHeight(height);
+        heightAnimation.setOnFinished(e -> {
+            this.getChildren().addAll(collection);
+            ParallelTransition parallelTransition = new ParallelTransition();
+            for(Node node : collection){
+                parallelTransition.getChildren().add(fadeIn(node));
+            }
+
+            parallelTransition.playFromStart();
+            animationsInProgress.remove(heightAnimation);
+        });
+
+        animationsInProgress.add(heightAnimation);
+        heightAnimation.playFromStart();
 
     }
 
-    public void clear(){
+    public void addAll(int index, Collection<? extends Node> collection) {
+        if (index < 0) return;
+        else if(index >= this.getChildren().size()){
+            addAll(collection);
+            return;
+        }
+        height += (collection.size() * 50);
+        this.setMaxHeight(height);
 
+        ParallelTransition parallelTransition = new ParallelTransition();
+        Timeline heightAnimation = animateMinHeight(height);
+        parallelTransition.getChildren().add(heightAnimation);
+
+        ArrayList<Node> itemsToBeMoved = new ArrayList<>();
+
+        if(index < this.getChildren().size() -1){
+            // items won't be added to the last slot, have to translate items below index
+            for(int i = index; i < this.getChildren().size(); i++){
+                TranslateTransition translateTransition = animateDown(this.getChildren().get(i), collection.size() * 50);
+                parallelTransition.getChildren().add(translateTransition);
+                itemsToBeMoved.add(this.getChildren().get(i));
+            }
+        }
+
+        parallelTransition.setOnFinished(e -> {
+            this.getChildren().addAll(index, collection);
+            for(Node node : itemsToBeMoved){
+                node.setTranslateY(0);
+            }
+
+            ParallelTransition parallelFadeIn = new ParallelTransition();
+            for(Node node : collection){
+                parallelFadeIn.getChildren().add(fadeIn(node));
+            }
+
+            parallelFadeIn.playFromStart();
+            animationsInProgress.remove(parallelTransition);
+        });
+
+        animationsInProgress.add(parallelTransition);
+        parallelTransition.playFromStart();
+    }
+
+    public void clear(){
+        if(!this.getChildren().isEmpty()){
+            height = 0;
+            this.setMinHeight(height);
+
+            ParallelTransition parallelFadeOut = new ParallelTransition();
+            for(Node node : this.getChildren()){
+                FadeTransition fadeTransition = fadeOut(node);
+                parallelFadeOut.getChildren().add(fadeTransition);
+            }
+
+            Timeline timeline = animateMaxHeight(height);
+
+            SequentialTransition sequentialTransition = new SequentialTransition();
+            sequentialTransition.getChildren().addAll(parallelFadeOut, timeline);
+
+            sequentialTransition.setOnFinished(e -> {
+                this.getChildren().clear();
+                animationsInProgress.remove(sequentialTransition);
+            });
+
+            animationsInProgress.add(sequentialTransition);
+            sequentialTransition.playFromStart();
+
+        }
     }
 
     public void move(int oldIndex, int newIndex){

@@ -2,12 +2,14 @@ package com.example.queue_demo;
 
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class Child extends Region {
@@ -27,7 +29,7 @@ public class Child extends Region {
         this.setOnMouseClicked((e) -> {
             if(!parent.animationsInProgress.isEmpty()) return;
             if(queueController.moveToggle.isSelected()) {
-                parent.moveAll(0, parent.getChildren().indexOf(this) - 1, -1);
+                parent.move(parent.getChildren().indexOf(this), -1);
             }
             else parent.remove(this);
         });

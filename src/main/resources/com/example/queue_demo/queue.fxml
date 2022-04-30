@@ -20,6 +20,6 @@
       <Button fx:id="addButton" mnemonicParsing="false" onAction="#add" text="Add to bottom" StackPane.alignment="CENTER_RIGHT" />
       <Button fx:id="addRandButton" mnemonicParsing="false" onAction="#addRand" text="Add to random" translateY="30.0" StackPane.alignment="CENTER_RIGHT" />
       <Button fx:id="clearButton" mnemonicParsing="false" onAction="#clear" text="Clear" translateY="60.0" StackPane.alignment="CENTER_RIGHT" />
-      <CheckBox fx:id="moveToggle" mnemonicParsing="false" text="Move toggle" translateY="85.0" StackPane.alignment="CENTER_RIGHT" />
+      <CheckBox fx:id="moveToggle" mnemonicParsing="false" text="Move to bottom toggle" translateY="85.0" StackPane.alignment="CENTER_RIGHT" />
    </children>
 </StackPane>

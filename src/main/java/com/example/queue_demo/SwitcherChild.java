@@ -12,11 +12,11 @@ import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Child extends Region {
+public class SwitcherChild extends Region {
 
     QueueController queueController;
 
-    Child(AnimatedVBox parent, QueueController queueController){
+    SwitcherChild(AnimatedSwitcher parent, QueueController queueController){
 
         this.queueController = queueController;
 
@@ -24,14 +24,14 @@ public class Child extends Region {
         this.setPrefSize(150, 50);
         this.setMaxSize(150, 50);
 
+        this.setOpacity(0);
         this.setCursor(Cursor.HAND);
         this.setBackground(createBackground());
         this.setOnMouseClicked((e) -> {
-            if(!parent.animationsInProgress.isEmpty()) return;
             if(queueController.moveToggle.isSelected()) {
-                parent.move(parent.getChildren().indexOf(this), -1);
+                parent.set(new SwitcherChild(parent, queueController));
             }
-            else parent.remove(this);
+            else parent.clear();
         });
 
     }

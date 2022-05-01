@@ -17,27 +17,36 @@ public class QueueController {
     ScrollPane scrollPane;
 
     @FXML
-    Button addButton, addRandButton;
+    Button addButton, addRandButton, switcherAddButton;
 
     @FXML
     CheckBox moveToggle;
 
-    AnimatedVBox animatedVBox = new AnimatedVBox();
+    @FXML
+    VBox scrollContent;
+
+    AnimatedSwitcher animatedSwitcher = new AnimatedSwitcher(this);
+    AnimatedVBox animatedVBox = new AnimatedVBox(this);
 
     @FXML
     public void initialize(){
-        scrollPane.setContent(animatedVBox);
+        scrollContent.setSpacing(30);
+        scrollContent.getChildren().addAll(animatedSwitcher, animatedVBox);
     }
 
 
 
     public void add(){
-        animatedVBox.add(new Child(animatedVBox, this));
+        animatedVBox.add(new VBoxChild(animatedVBox, this));
+    }
+
+    public void addToSwitcher(){
+        animatedSwitcher.set(new SwitcherChild(animatedSwitcher, this));
     }
 
     public void addRand(){
         Random random = new Random();
-        animatedVBox.add(random.nextInt(Math.max(animatedVBox.getChildren().size(), 1)), new Child(animatedVBox, this));
+        animatedVBox.add(random.nextInt(Math.max(animatedVBox.getChildren().size(), 1)), new VBoxChild(animatedVBox, this));
     }
 
     public void clear(){

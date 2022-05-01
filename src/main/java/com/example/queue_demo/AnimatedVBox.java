@@ -12,12 +12,15 @@ public class AnimatedVBox extends VBox {
 
     double animationSpeed = 200;
     double height = 0;
+    QueueController queueController;
 
     ArrayList<Animation> animationsInProgress = new ArrayList<>();
 
-    AnimatedVBox(){
+    AnimatedVBox(QueueController queueController){
+
+        this.queueController = queueController;
         this.setAlignment(Pos.TOP_CENTER);
-        this.setStyle("-fx-background-color: rgb(45,45,45);");
+        this.setStyle("-fx-background-color: white;");
         this.setMinWidth(150);
         this.setFillWidth(true);
     }

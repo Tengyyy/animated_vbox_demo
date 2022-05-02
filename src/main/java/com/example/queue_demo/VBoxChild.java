@@ -16,6 +16,10 @@ public class VBoxChild extends Region {
 
     QueueController queueController;
 
+    int red = 0;
+    int green = 0;
+    int blue = 0;
+
     VBoxChild(AnimatedVBox parent, QueueController queueController){
 
         this.queueController = queueController;
@@ -28,9 +32,13 @@ public class VBoxChild extends Region {
         this.setCursor(Cursor.HAND);
         this.setBackground(createBackground());
         this.setOnMouseClicked((e) -> {
-            if(!parent.animationsInProgress.isEmpty()) return;
+            if(!queueController.animationsInProgress.isEmpty()) return;
+
             if(queueController.moveToggle.isSelected()) {
-                parent.move(parent.getChildren().indexOf(this), -1);
+                queueController.animationWrapper.play(this);
+            }
+            else if(queueController.randomToggle.isSelected()){
+                queueController.animationWrapper.playRandom(this);
             }
             else parent.remove(this);
         });
@@ -39,11 +47,23 @@ public class VBoxChild extends Region {
 
     public Background createBackground(){
         Random random = new Random();
-        int red = random.nextInt(256);
-        int green = random.nextInt(256);
-        int blue = random.nextInt(256);
+        red = random.nextInt(256);
+        green = random.nextInt(256);
+        blue = random.nextInt(256);
 
         return new Background(new BackgroundFill(Color.rgb(red, green, blue), CornerRadii.EMPTY, Insets.EMPTY));
+    }
+
+    public int getRed(){
+        return red;
+    }
+
+    public int getGreen(){
+        return green;
+    }
+
+    public int getBlue(){
+        return blue;
     }
 
 }

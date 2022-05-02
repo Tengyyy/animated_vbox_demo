@@ -28,8 +28,14 @@ public class SwitcherChild extends Region {
         this.setCursor(Cursor.HAND);
         this.setBackground(createBackground());
         this.setOnMouseClicked((e) -> {
-            if(queueController.moveToggle.isSelected()) {
-                parent.set(new SwitcherChild(parent, queueController));
+
+            if(!queueController.animationsInProgress.isEmpty()) return;
+
+            if(queueController.moveToggle.isSelected() && !queueController.queueBox.getChildren().isEmpty()) {
+
+                // add first item from animatedVbox to switcher (or random if shuffle were on)
+                queueController.animationWrapper.play(queueController.queueBox.getChildren().get(0));
+
             }
             else parent.clear();
         });
@@ -44,5 +50,10 @@ public class SwitcherChild extends Region {
 
         return new Background(new BackgroundFill(Color.rgb(red, green, blue), CornerRadii.EMPTY, Insets.EMPTY));
     }
+
+    public Background createBackground(int red, int green, int blue){
+        return new Background(new BackgroundFill(Color.rgb(red, green, blue), CornerRadii.EMPTY, Insets.EMPTY));
+    }
+
 
 }

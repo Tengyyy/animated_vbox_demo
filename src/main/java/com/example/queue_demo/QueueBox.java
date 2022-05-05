@@ -11,18 +11,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-public class AnimatedVBox extends VBox {
+public class QueueBox extends VBox {
 
     double animationSpeed = 200;
     double height = 0;
-    QueueController queueController;
+    MenuController menuController;
 
 
-    AnimatedVBox(QueueController queueController){
-        this.queueController = queueController;
+    QueueBox(MenuController menuController){
+        this.menuController = menuController;
         this.setAlignment(Pos.TOP_CENTER);
         this.setStyle("-fx-background-color: white;");
         this.setMinWidth(150);
+        this.setPrefWidth(150);
+        this.setMaxWidth(150);
         this.setFillWidth(true);
     }
 
@@ -52,12 +54,12 @@ public class AnimatedVBox extends VBox {
             }
 
             FadeTransition fadeTransition = fadeIn(child);
-            queueController.animationsInProgress.remove(parallelTransition);
+            menuController.animationsInProgress.remove(parallelTransition);
             fadeTransition.playFromStart();
         });
 
 
-        queueController.animationsInProgress.add(parallelTransition);
+        menuController.animationsInProgress.add(parallelTransition);
         parallelTransition.playFromStart();
 
     }
@@ -71,10 +73,10 @@ public class AnimatedVBox extends VBox {
             // add item with opacity 0, then fade it in
             this.getChildren().add(child);
             FadeTransition fadeTransition = fadeIn(child);
-            queueController.animationsInProgress.remove(heightAnimation);
+            menuController.animationsInProgress.remove(heightAnimation);
             fadeTransition.playFromStart();
         });
-        queueController.animationsInProgress.add(heightAnimation);
+        menuController.animationsInProgress.add(heightAnimation);
         heightAnimation.playFromStart();
     }
 
@@ -98,7 +100,7 @@ public class AnimatedVBox extends VBox {
             ArrayList<Node> childrenToBeMoved = new ArrayList<>();
 
             ParallelTransition parallelTransition = new ParallelTransition();
-            parallelTransition.getChildren().addAll(timeline);
+            parallelTransition.getChildren().add(timeline);
 
                 if (index < this.getChildren().size() - 1) {
                     // removed child was not the last inside the vbox, have to translate upwards all nodes that were below
@@ -115,14 +117,76 @@ public class AnimatedVBox extends VBox {
                     for (Node node : childrenToBeMoved) {
                         node.setTranslateY(0);
                     }
-                    queueController.animationsInProgress.remove(sequentialTransition);
+                    menuController.animationsInProgress.remove(sequentialTransition);
                 });
 
-                queueController.animationsInProgress.add(sequentialTransition);
+                menuController.animationsInProgress.add(sequentialTransition);
                 sequentialTransition.playFromStart();
 
                 // decrease max height by 50, apply translate of -50 to all nodes below the one that will be removed and on end actually remove the node and reset translate
         }
+    }
+    public void removeAndMove(int index){
+        // removes item at index from the queuebox, moves all previous items to the bottom
+        if(index < 0 || index >= getChildren().size()) return;
+        if(index ==0){
+            remove(index);
+            return;
+        }
+
+        height -= 50;
+        this.setMinHeight(height);
+
+        ParallelTransition parallelFadeOut = new ParallelTransition();
+        ParallelTransition parallelTranslate = new ParallelTransition();
+        ParallelTransition parallelFadeIn = new ParallelTransition();
+        ArrayList<Node> itemsToBeTranslated = new ArrayList<>();
+        ArrayList<Node> itemsToBeMoved = new ArrayList<>();
+
+        FadeTransition fade = fadeOut(this.getChildren().get(index));
+        parallelFadeOut.getChildren().add(fade);
+
+        for(int i = 0; i < index; i++){
+            FadeTransition fadeTransition = fadeOut(getChildren().get(i));
+            parallelFadeOut.getChildren().add(fadeTransition);
+            itemsToBeMoved.add(getChildren().get(i));
+        }
+
+        parallelFadeOut.setOnFinished(e -> {
+
+            parallelTranslate.getChildren().add(animateMaxHeight(height));
+            for(int i = index + 1; i < getChildren().size(); i++){
+                itemsToBeTranslated.add(getChildren().get(i));
+                parallelTranslate.getChildren().add(animateUp(getChildren().get(i), itemsToBeMoved.size() * 50 + 50));
+            }
+
+            parallelTranslate.setOnFinished(k -> {
+
+                getChildren().remove(index);
+                getChildren().removeAll(itemsToBeMoved);
+
+                for(Node node: itemsToBeTranslated){
+                    node.setTranslateY(0);
+                }
+
+                getChildren().addAll(itemsToBeMoved);
+                for(Node node : itemsToBeMoved){
+                    parallelFadeIn.getChildren().add(fadeIn(node));
+                }
+
+                menuController.animationsInProgress.remove(parallelTranslate);
+                parallelFadeIn.playFromStart();
+            });
+
+
+            menuController.animationsInProgress.remove(parallelFadeOut);
+            menuController.animationsInProgress.add(parallelTranslate);
+            parallelTranslate.playFromStart();
+        });
+
+        menuController.animationsInProgress.add(parallelFadeOut);
+        parallelFadeOut.playFromStart();
+
     }
 
     public void moveAll(int firstBound, int secondBound, int newIndex){
@@ -186,16 +250,16 @@ public class AnimatedVBox extends VBox {
                 for(Node node : nodesInRange){
                     parallelFadeTransition.getChildren().add(fadeIn(node));
                 }
-                queueController.animationsInProgress.remove(parallelTranslateTransition);
+                menuController.animationsInProgress.remove(parallelTranslateTransition);
                 parallelFadeTransition.playFromStart();
 
             });
-            queueController.animationsInProgress.remove(parallelTransition);
-            queueController.animationsInProgress.add(parallelTranslateTransition);
+            menuController.animationsInProgress.remove(parallelTransition);
+            menuController.animationsInProgress.add(parallelTranslateTransition);
             parallelTranslateTransition.playFromStart();
         });
 
-        queueController.animationsInProgress.add(parallelTransition);
+        menuController.animationsInProgress.add(parallelTransition);
         parallelTransition.playFromStart();
 
     }
@@ -213,10 +277,10 @@ public class AnimatedVBox extends VBox {
             }
 
             parallelTransition.playFromStart();
-            queueController.animationsInProgress.remove(heightAnimation);
+            menuController.animationsInProgress.remove(heightAnimation);
         });
 
-        queueController.animationsInProgress.add(heightAnimation);
+        menuController.animationsInProgress.add(heightAnimation);
         heightAnimation.playFromStart();
 
     }
@@ -257,10 +321,10 @@ public class AnimatedVBox extends VBox {
             }
 
             parallelFadeIn.playFromStart();
-            queueController.animationsInProgress.remove(parallelTransition);
+            menuController.animationsInProgress.remove(parallelTransition);
         });
 
-        queueController.animationsInProgress.add(parallelTransition);
+        menuController.animationsInProgress.add(parallelTransition);
         parallelTransition.playFromStart();
     }
 
@@ -282,10 +346,10 @@ public class AnimatedVBox extends VBox {
 
             sequentialTransition.setOnFinished(e -> {
                 this.getChildren().clear();
-                queueController.animationsInProgress.remove(sequentialTransition);
+                menuController.animationsInProgress.remove(sequentialTransition);
             });
 
-            queueController.animationsInProgress.add(sequentialTransition);
+            menuController.animationsInProgress.add(sequentialTransition);
             sequentialTransition.playFromStart();
 
         }
@@ -328,16 +392,16 @@ public class AnimatedVBox extends VBox {
                     else this.getChildren().add(newIndex, child);
                     FadeTransition fadeTransition1 = fadeIn(child);
 
-                    queueController.animationsInProgress.remove(parallelTransition);
+                    menuController.animationsInProgress.remove(parallelTransition);
                     fadeTransition1.playFromStart();
                 });
 
-                queueController.animationsInProgress.remove(fadeTransition);
-                queueController.animationsInProgress.add(parallelTransition);
+                menuController.animationsInProgress.remove(fadeTransition);
+                menuController.animationsInProgress.add(parallelTransition);
                 parallelTransition.playFromStart();
             });
 
-            queueController.animationsInProgress.add(fadeTransition);
+            menuController.animationsInProgress.add(fadeTransition);
             fadeTransition.playFromStart();
 
         }
@@ -368,17 +432,17 @@ public class AnimatedVBox extends VBox {
                     this.getChildren().add(newIndex, child);
                     FadeTransition fadeTransition1 = fadeIn(child);
 
-                    queueController.animationsInProgress.remove(parallelTransition);
+                    menuController.animationsInProgress.remove(parallelTransition);
 
                     fadeTransition1.playFromStart();
                 });
 
-                queueController.animationsInProgress.remove(fadeTransition);
-                queueController.animationsInProgress.add(parallelTransition);
+                menuController.animationsInProgress.remove(fadeTransition);
+                menuController.animationsInProgress.add(parallelTransition);
                 parallelTransition.playFromStart();
             });
 
-            queueController.animationsInProgress.add(fadeTransition);
+            menuController.animationsInProgress.add(fadeTransition);
             fadeTransition.playFromStart();
         }
 
@@ -407,16 +471,16 @@ public class AnimatedVBox extends VBox {
             }
 
             parallelFadeIn.setOnFinished(k -> {
-                queueController.animationsInProgress.remove(parallelFadeIn);
+                menuController.animationsInProgress.remove(parallelFadeIn);
             });
 
-            queueController.animationsInProgress.add(parallelFadeIn);
+            menuController.animationsInProgress.add(parallelFadeIn);
             parallelFadeIn.playFromStart();
 
-            queueController.animationsInProgress.remove(parallelFadeOut);
+            menuController.animationsInProgress.remove(parallelFadeOut);
         });
 
-        queueController.animationsInProgress.add(parallelFadeOut);
+        menuController.animationsInProgress.add(parallelFadeOut);
         parallelFadeOut.playFromStart();
 
     }
@@ -451,7 +515,7 @@ public class AnimatedVBox extends VBox {
         return fadeTransition;
     }
 
-    public TranslateTransition animateUp(Node child, int translate){
+    public TranslateTransition animateUp(Node child, double translate){
         Duration animationDuration = Duration.millis(animationSpeed);
         TranslateTransition translateTransition = new TranslateTransition(animationDuration, child);
         translateTransition.setFromY(0);
@@ -459,7 +523,7 @@ public class AnimatedVBox extends VBox {
         return translateTransition;
     }
 
-    public TranslateTransition animateDown(Node child, int translate){
+    public TranslateTransition animateDown(Node child, double translate){
         Duration animationDuration = Duration.millis(animationSpeed);
         TranslateTransition translateTransition = new TranslateTransition(animationDuration, child);
         translateTransition.setFromY(0);

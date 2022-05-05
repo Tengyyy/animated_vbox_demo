@@ -26,7 +26,7 @@ public class ActiveItem extends StackPane {
         if(this.getChildren().isEmpty()) return;
 
         Node child = this.getChildren().get(0);
-        FadeTransition fadeTransition = fadeOut(child);
+        FadeTransition fadeTransition = Animations.fadeOut(child);
         fadeTransition.setOnFinished(e -> {
             this.getChildren().clear();
             menuController.animationsInProgress.remove(fadeTransition);
@@ -59,7 +59,7 @@ public class ActiveItem extends StackPane {
 
             pause2.setOnFinished(e -> {
                 this.getChildren().add(node);
-                FadeTransition fadeTransition = fadeIn(node);
+                FadeTransition fadeTransition = Animations.fadeIn(node);
 
                 menuController.animationsInProgress.remove(pause2);
                 fadeTransition.playFromStart();
@@ -72,7 +72,7 @@ public class ActiveItem extends StackPane {
             // remove old, add new item
 
             Node oldChild = this.getChildren().get(0);
-            FadeTransition fadeOut = fadeOut(oldChild);
+            FadeTransition fadeOut = Animations.fadeOut(oldChild);
             fadeOut.setOnFinished(e -> {
                 PauseTransition pauseTransition = new PauseTransition();
                 if(pause) pauseTransition.setDuration(Duration.millis(animationSpeed));
@@ -80,7 +80,7 @@ public class ActiveItem extends StackPane {
 
                 pauseTransition.setOnFinished(h -> {
                     getChildren().set(0, node);
-                    FadeTransition fadeIn = fadeIn(node);
+                    FadeTransition fadeIn = Animations.fadeIn(node);
 
                     menuController.animationsInProgress.remove(pauseTransition);
                     fadeIn.playFromStart();
@@ -94,23 +94,6 @@ public class ActiveItem extends StackPane {
             menuController.animationsInProgress.add(fadeOut);
             fadeOut.playFromStart();
         }
-    }
-
-
-    public FadeTransition fadeIn(Node child){
-        Duration animationDuration = Duration.millis(animationSpeed);
-        FadeTransition fadeTransition = new FadeTransition(animationDuration, child);
-        fadeTransition.setFromValue(0);
-        fadeTransition.setToValue(1);
-        return fadeTransition;
-    }
-
-    public FadeTransition fadeOut(Node child){
-        Duration animationDuration = Duration.millis(animationSpeed);
-        FadeTransition fadeTransition = new FadeTransition(animationDuration, child);
-        fadeTransition.setFromValue(1);
-        fadeTransition.setToValue(0);
-        return fadeTransition;
     }
 
 }

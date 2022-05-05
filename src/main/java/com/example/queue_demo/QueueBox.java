@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+
 public class QueueBox extends VBox {
 
     double animationSpeed = 200;
@@ -36,7 +37,7 @@ public class QueueBox extends VBox {
         }
         height+= 50;
         this.setMaxHeight(height);
-        Timeline heightAnimation = animateMinHeight(height);
+        Timeline heightAnimation = Animations.animateMinHeight(height, this);
 
         ArrayList<Node> childrenToBeMoved = new ArrayList<>();
         ParallelTransition parallelTransition = new ParallelTransition();
@@ -44,7 +45,7 @@ public class QueueBox extends VBox {
 
         for(int i = index; i < this.getChildren().size(); i++){
             childrenToBeMoved.add(this.getChildren().get(i));
-            parallelTransition.getChildren().add(animateDown(this.getChildren().get(i), 50));
+            parallelTransition.getChildren().add(Animations.animateDown(this.getChildren().get(i), 50));
         }
 
         parallelTransition.setOnFinished((ev) -> {
@@ -53,7 +54,7 @@ public class QueueBox extends VBox {
                 node.setTranslateY(0);
             }
 
-            FadeTransition fadeTransition = fadeIn(child);
+            FadeTransition fadeTransition = Animations.fadeIn(child);
             menuController.animationsInProgress.remove(parallelTransition);
             fadeTransition.playFromStart();
         });
@@ -68,11 +69,11 @@ public class QueueBox extends VBox {
 
         height+= 50;
         this.setMaxHeight(height);
-        Timeline heightAnimation = animateMinHeight(height);
+        Timeline heightAnimation = Animations.animateMinHeight(height, this);
         heightAnimation.setOnFinished((e) -> {
             // add item with opacity 0, then fade it in
             this.getChildren().add(child);
-            FadeTransition fadeTransition = fadeIn(child);
+            FadeTransition fadeTransition = Animations.fadeIn(child);
             menuController.animationsInProgress.remove(heightAnimation);
             fadeTransition.playFromStart();
         });
@@ -91,12 +92,12 @@ public class QueueBox extends VBox {
             height -= 50;
             this.setMinHeight(height);
 
-            FadeTransition fadeTransition = fadeOut(this.getChildren().get(index));
+            FadeTransition fadeTransition = Animations.fadeOut(this.getChildren().get(index));
 
             SequentialTransition sequentialTransition = new SequentialTransition();
             sequentialTransition.getChildren().add(fadeTransition);
 
-            Timeline timeline = animateMaxHeight(height);
+            Timeline timeline = Animations.animateMaxHeight(height, this);
             ArrayList<Node> childrenToBeMoved = new ArrayList<>();
 
             ParallelTransition parallelTransition = new ParallelTransition();
@@ -106,7 +107,7 @@ public class QueueBox extends VBox {
                     // removed child was not the last inside the vbox, have to translate upwards all nodes that were below
                     for (int i = index + 1; i < this.getChildren().size(); i++) {
                         childrenToBeMoved.add(this.getChildren().get(i));
-                        parallelTransition.getChildren().add(animateUp(this.getChildren().get(i), 50));
+                        parallelTransition.getChildren().add(Animations.animateUp(this.getChildren().get(i), 50));
                     }
                 }
 
@@ -143,21 +144,21 @@ public class QueueBox extends VBox {
         ArrayList<Node> itemsToBeTranslated = new ArrayList<>();
         ArrayList<Node> itemsToBeMoved = new ArrayList<>();
 
-        FadeTransition fade = fadeOut(this.getChildren().get(index));
+        FadeTransition fade = Animations.fadeOut(this.getChildren().get(index));
         parallelFadeOut.getChildren().add(fade);
 
         for(int i = 0; i < index; i++){
-            FadeTransition fadeTransition = fadeOut(getChildren().get(i));
+            FadeTransition fadeTransition = Animations.fadeOut(getChildren().get(i));
             parallelFadeOut.getChildren().add(fadeTransition);
             itemsToBeMoved.add(getChildren().get(i));
         }
 
         parallelFadeOut.setOnFinished(e -> {
 
-            parallelTranslate.getChildren().add(animateMaxHeight(height));
+            parallelTranslate.getChildren().add(Animations.animateMaxHeight(height, this));
             for(int i = index + 1; i < getChildren().size(); i++){
                 itemsToBeTranslated.add(getChildren().get(i));
-                parallelTranslate.getChildren().add(animateUp(getChildren().get(i), itemsToBeMoved.size() * 50 + 50));
+                parallelTranslate.getChildren().add(Animations.animateUp(getChildren().get(i), itemsToBeMoved.size() * 50 + 50));
             }
 
             parallelTranslate.setOnFinished(k -> {
@@ -171,7 +172,7 @@ public class QueueBox extends VBox {
 
                 getChildren().addAll(itemsToBeMoved);
                 for(Node node : itemsToBeMoved){
-                    parallelFadeIn.getChildren().add(fadeIn(node));
+                    parallelFadeIn.getChildren().add(Animations.fadeIn(node));
                 }
 
                 menuController.animationsInProgress.remove(parallelTranslate);
@@ -208,7 +209,7 @@ public class QueueBox extends VBox {
         for(int i = firstBound; i <= secondBound; i++){
             // all the children that will be moved
             nodesInRange.add(this.getChildren().get(i));
-            FadeTransition fadeTransition = fadeOut(this.getChildren().get(i));
+            FadeTransition fadeTransition = Animations.fadeOut(this.getChildren().get(i));
             parallelTransition.getChildren().add(fadeTransition);
         }
 
@@ -221,14 +222,14 @@ public class QueueBox extends VBox {
                 int loopTo = newIndex == -1 ? this.getChildren().size() : secondBound - firstBound + newIndex + 1;
                 for(int i = secondBound + 1; i < loopTo; i++){
                     childrenToBeMoved.add(this.getChildren().get(i));
-                    parallelTranslateTransition.getChildren().add(animateUp(this.getChildren().get(i), 50 * (secondBound - firstBound + 1)));
+                    parallelTranslateTransition.getChildren().add(Animations.animateUp(this.getChildren().get(i), 50 * (secondBound - firstBound + 1)));
                 }
             }
             else {
                 // move items up
                 for(int i = firstBound - 1; i>= newIndex; i--){
                     childrenToBeMoved.add(this.getChildren().get(i));
-                    parallelTranslateTransition.getChildren().add(animateDown(this.getChildren().get(i), 50 * (secondBound - firstBound + 1)));
+                    parallelTranslateTransition.getChildren().add(Animations.animateDown(this.getChildren().get(i), 50 * (secondBound - firstBound + 1)));
                 }
             }
 
@@ -248,7 +249,7 @@ public class QueueBox extends VBox {
 
                 ParallelTransition parallelFadeTransition = new ParallelTransition();
                 for(Node node : nodesInRange){
-                    parallelFadeTransition.getChildren().add(fadeIn(node));
+                    parallelFadeTransition.getChildren().add(Animations.fadeIn(node));
                 }
                 menuController.animationsInProgress.remove(parallelTranslateTransition);
                 parallelFadeTransition.playFromStart();
@@ -268,12 +269,12 @@ public class QueueBox extends VBox {
         height += (collection.size() * 50);
         this.setMaxHeight(height);
 
-        Timeline heightAnimation = animateMinHeight(height);
+        Timeline heightAnimation = Animations.animateMinHeight(height, this);
         heightAnimation.setOnFinished(e -> {
             this.getChildren().addAll(collection);
             ParallelTransition parallelTransition = new ParallelTransition();
             for(Node node : collection){
-                parallelTransition.getChildren().add(fadeIn(node));
+                parallelTransition.getChildren().add(Animations.fadeIn(node));
             }
 
             parallelTransition.playFromStart();
@@ -295,7 +296,7 @@ public class QueueBox extends VBox {
         this.setMaxHeight(height);
 
         ParallelTransition parallelTransition = new ParallelTransition();
-        Timeline heightAnimation = animateMinHeight(height);
+        Timeline heightAnimation = Animations.animateMinHeight(height, this);
         parallelTransition.getChildren().add(heightAnimation);
 
         ArrayList<Node> itemsToBeMoved = new ArrayList<>();
@@ -303,7 +304,7 @@ public class QueueBox extends VBox {
         if(index < this.getChildren().size() -1){
             // items won't be added to the last slot, have to translate items below index
             for(int i = index; i < this.getChildren().size(); i++){
-                TranslateTransition translateTransition = animateDown(this.getChildren().get(i), collection.size() * 50);
+                TranslateTransition translateTransition = Animations.animateDown(this.getChildren().get(i), collection.size() * 50);
                 parallelTransition.getChildren().add(translateTransition);
                 itemsToBeMoved.add(this.getChildren().get(i));
             }
@@ -317,7 +318,7 @@ public class QueueBox extends VBox {
 
             ParallelTransition parallelFadeIn = new ParallelTransition();
             for(Node node : collection){
-                parallelFadeIn.getChildren().add(fadeIn(node));
+                parallelFadeIn.getChildren().add(Animations.fadeIn(node));
             }
 
             parallelFadeIn.playFromStart();
@@ -335,11 +336,11 @@ public class QueueBox extends VBox {
 
             ParallelTransition parallelFadeOut = new ParallelTransition();
             for(Node node : this.getChildren()){
-                FadeTransition fadeTransition = fadeOut(node);
+                FadeTransition fadeTransition = Animations.fadeOut(node);
                 parallelFadeOut.getChildren().add(fadeTransition);
             }
 
-            Timeline timeline = animateMaxHeight(height);
+            Timeline timeline = Animations.animateMaxHeight(height, this);
 
             SequentialTransition sequentialTransition = new SequentialTransition();
             sequentialTransition.getChildren().addAll(parallelFadeOut, timeline);
@@ -371,7 +372,7 @@ public class QueueBox extends VBox {
 
             Node child = this.getChildren().get(oldIndex);
 
-            FadeTransition fadeTransition = fadeOut(child);
+            FadeTransition fadeTransition = Animations.fadeOut(child);
             fadeTransition.setOnFinished((e) -> {
                 ArrayList<Node> childrenToBeMoved = new ArrayList<>();
                 ParallelTransition parallelTransition = new ParallelTransition();
@@ -380,7 +381,7 @@ public class QueueBox extends VBox {
 
                 for(int i = oldIndex + 1; i < loopEndIndex; i++){
                     childrenToBeMoved.add(this.getChildren().get(i));
-                    parallelTransition.getChildren().add(animateUp(this.getChildren().get(i), 50));
+                    parallelTransition.getChildren().add(Animations.animateUp(this.getChildren().get(i), 50));
                 }
 
                 parallelTransition.setOnFinished((ev) -> {
@@ -390,7 +391,7 @@ public class QueueBox extends VBox {
                     }
                     if(newIndex == -1) this.getChildren().add(child);
                     else this.getChildren().add(newIndex, child);
-                    FadeTransition fadeTransition1 = fadeIn(child);
+                    FadeTransition fadeTransition1 = Animations.fadeIn(child);
 
                     menuController.animationsInProgress.remove(parallelTransition);
                     fadeTransition1.playFromStart();
@@ -412,7 +413,7 @@ public class QueueBox extends VBox {
 
             Node child = this.getChildren().get(oldIndex);
 
-            FadeTransition fadeTransition = fadeOut(child);
+            FadeTransition fadeTransition = Animations.fadeOut(child);
             fadeTransition.setOnFinished((e) -> {
                 ArrayList<Node> childrenToBeMoved = new ArrayList<>();
                 ParallelTransition parallelTransition = new ParallelTransition();
@@ -420,7 +421,7 @@ public class QueueBox extends VBox {
 
                 for(int i = newIndex; i < oldIndex; i++){
                     childrenToBeMoved.add(this.getChildren().get(i));
-                    parallelTransition.getChildren().add(animateDown(this.getChildren().get(i), 50));
+                    parallelTransition.getChildren().add(Animations.animateDown(this.getChildren().get(i), 50));
                 }
 
                 parallelTransition.setOnFinished((ev) -> {
@@ -430,7 +431,7 @@ public class QueueBox extends VBox {
                     }
 
                     this.getChildren().add(newIndex, child);
-                    FadeTransition fadeTransition1 = fadeIn(child);
+                    FadeTransition fadeTransition1 = Animations.fadeIn(child);
 
                     menuController.animationsInProgress.remove(parallelTransition);
 
@@ -455,7 +456,7 @@ public class QueueBox extends VBox {
         ParallelTransition parallelFadeOut = new ParallelTransition();
 
         for(Node node : this.getChildren()){
-            FadeTransition fadeTransition = fadeOut(node);
+            FadeTransition fadeTransition = Animations.fadeOut(node);
             parallelFadeOut.getChildren().add(fadeTransition);
         }
 
@@ -466,7 +467,7 @@ public class QueueBox extends VBox {
 
             ParallelTransition parallelFadeIn = new ParallelTransition();
             for(Node node : this.getChildren()){
-                FadeTransition fadeTransition = fadeIn(node);
+                FadeTransition fadeTransition = Animations.fadeIn(node);
                 parallelFadeIn.getChildren().add(fadeTransition);
             }
 
@@ -485,50 +486,5 @@ public class QueueBox extends VBox {
 
     }
 
-    public Timeline animateMinHeight(double newHeight){
-        Duration animationDuration = Duration.millis(animationSpeed);
-        Timeline minTimeline = new Timeline(new KeyFrame(animationDuration,
-                new KeyValue(this.minHeightProperty(),newHeight, Interpolator.EASE_BOTH)));
-        return minTimeline;
-    }
-
-    public Timeline animateMaxHeight(double newHeight){
-        Duration animationDuration = Duration.millis(animationSpeed);
-        Timeline maxTimeline = new Timeline(new KeyFrame(animationDuration,
-                new KeyValue(this.maxHeightProperty(),newHeight, Interpolator.EASE_BOTH)));
-        return maxTimeline;
-    }
-
-    public FadeTransition fadeIn(Node child){
-        Duration animationDuration = Duration.millis(animationSpeed);
-        FadeTransition fadeTransition = new FadeTransition(animationDuration, child);
-        fadeTransition.setFromValue(0);
-        fadeTransition.setToValue(1);
-        return fadeTransition;
-    }
-
-    public FadeTransition fadeOut(Node child){
-        Duration animationDuration = Duration.millis(animationSpeed);
-        FadeTransition fadeTransition = new FadeTransition(animationDuration, child);
-        fadeTransition.setFromValue(1);
-        fadeTransition.setToValue(0);
-        return fadeTransition;
-    }
-
-    public TranslateTransition animateUp(Node child, double translate){
-        Duration animationDuration = Duration.millis(animationSpeed);
-        TranslateTransition translateTransition = new TranslateTransition(animationDuration, child);
-        translateTransition.setFromY(0);
-        translateTransition.setToY(-translate);
-        return translateTransition;
-    }
-
-    public TranslateTransition animateDown(Node child, double translate){
-        Duration animationDuration = Duration.millis(animationSpeed);
-        TranslateTransition translateTransition = new TranslateTransition(animationDuration, child);
-        translateTransition.setFromY(0);
-        translateTransition.setToY(translate);
-        return translateTransition;
-    }
 
 }

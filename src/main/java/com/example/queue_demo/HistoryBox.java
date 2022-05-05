@@ -74,7 +74,7 @@ public class HistoryBox extends VBox {
                 pauseTransition.setOnFinished(k -> {
                     height+= HistoryChild.height;
                     historyWrapper.setMaxHeight(height);
-                    Timeline heightAnimation = animateMinHeight(height);
+                    Timeline heightAnimation = Animations.animateMinHeight(height, historyWrapper);
                     heightAnimation.setOnFinished((e) -> {
                         // add item with opacity 0, then fade it in
                         if(getChildren().isEmpty()) {
@@ -86,7 +86,7 @@ public class HistoryBox extends VBox {
                             });
                         }
                         else this.getChildren().add(child);
-                        FadeTransition fadeTransition = fadeIn(child);
+                        FadeTransition fadeTransition = Animations.fadeIn(child);
                         menuController.animationsInProgress.remove(heightAnimation);
                         fadeTransition.playFromStart();
                     });
@@ -101,12 +101,12 @@ public class HistoryBox extends VBox {
             else {
                 ParallelTransition parallelTranslate = new ParallelTransition();
                 ArrayList<Node> itemsToBeTranslated = new ArrayList<>();
-                FadeTransition fadeOut = fadeOut(getChildren().get(0));
-                FadeTransition fadeIn = fadeIn(child);
+                FadeTransition fadeOut = Animations.fadeOut(getChildren().get(0));
+                FadeTransition fadeIn = Animations.fadeIn(child);
                 fadeOut.setOnFinished(e -> {
                     for(int i = 1; i < CAPACITY; i++){
                         itemsToBeTranslated.add(getChildren().get(i));
-                        parallelTranslate.getChildren().add(animateUp(getChildren().get(i), HistoryChild.height));
+                        parallelTranslate.getChildren().add(Animations.animateUp(getChildren().get(i), HistoryChild.height));
                     }
 
                     parallelTranslate.setOnFinished(g -> {
@@ -133,44 +133,6 @@ public class HistoryBox extends VBox {
             }
         }
 
-    }
-
-    public FadeTransition fadeIn(Node child){
-        Duration animationDuration = Duration.millis(animationSpeed);
-        FadeTransition fadeTransition = new FadeTransition(animationDuration, child);
-        fadeTransition.setFromValue(0);
-        fadeTransition.setToValue(1);
-        return fadeTransition;
-    }
-
-    public FadeTransition fadeOut(Node child){
-        Duration animationDuration = Duration.millis(animationSpeed);
-        FadeTransition fadeTransition = new FadeTransition(animationDuration, child);
-        fadeTransition.setFromValue(1);
-        fadeTransition.setToValue(0);
-        return fadeTransition;
-    }
-
-    public TranslateTransition animateUp(Node child, double translate){
-        Duration animationDuration = Duration.millis(animationSpeed);
-        TranslateTransition translateTransition = new TranslateTransition(animationDuration, child);
-        translateTransition.setFromY(0);
-        translateTransition.setToY(-translate);
-        return translateTransition;
-    }
-
-    public Timeline animateMinHeight(double newHeight){
-        Duration animationDuration = Duration.millis(animationSpeed);
-        Timeline minTimeline = new Timeline(new KeyFrame(animationDuration,
-                new KeyValue(historyWrapper.minHeightProperty(),newHeight, Interpolator.EASE_BOTH)));
-        return minTimeline;
-    }
-
-    public Timeline animateMaxHeight(double newHeight){
-        Duration animationDuration = Duration.millis(animationSpeed);
-        Timeline maxTimeline = new Timeline(new KeyFrame(animationDuration,
-                new KeyValue(historyWrapper.maxHeightProperty(),newHeight, Interpolator.EASE_BOTH)));
-        return maxTimeline;
     }
 
     public void open(){
